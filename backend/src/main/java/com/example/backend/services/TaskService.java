@@ -6,6 +6,7 @@ import com.example.backend.entities.TaskHistory;
 import com.example.backend.entities.User;
 import com.example.backend.entities.request.CreateTaskRequestDTO;
 import com.example.backend.entities.request.FinalizeTaskRequestDTO;
+import com.example.backend.entities.request.ListTaskHistoryRequestDTO;
 import com.example.backend.repositories.ComplementRepository;
 import com.example.backend.repositories.TaskHistoryRepository;
 import com.example.backend.repositories.TaskRepository;
@@ -77,5 +78,16 @@ public class TaskService {
         taskHistory.setTaskId(task.getId());
         TaskHistory persisted = taskHistoryRepository.save(taskHistory);
         return persisted;
+    }
+
+    public List<TaskHistory> listTaskHistories(ListTaskHistoryRequestDTO listTaskHistoryRequestDTO) {
+        Optional<Task> taskOptional = taskRepository.findById(listTaskHistoryRequestDTO.getTasId());
+        if (taskOptional.isEmpty()) {
+            throw new RuntimeException("Task not found");
+        }
+        Task task = taskOptional.get();
+
+        List<TaskHistory> listTaskHistory = taskHistoryRepository.findByTaskId(task.getId());
+        return listTaskHistory;
     }
 }

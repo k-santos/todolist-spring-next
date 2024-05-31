@@ -4,6 +4,7 @@ import com.example.backend.entities.Task;
 import com.example.backend.entities.TaskHistory;
 import com.example.backend.entities.request.CreateTaskRequestDTO;
 import com.example.backend.entities.request.FinalizeTaskRequestDTO;
+import com.example.backend.entities.request.ListTaskHistoryRequestDTO;
 import com.example.backend.entities.request.ListTaskRequestDTO;
 import com.example.backend.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,12 @@ public class TaskController {
     @PostMapping("/finalize")
     public ResponseEntity<TaskHistory> finalizeTasks(@RequestBody FinalizeTaskRequestDTO finalizeTaskRequestDTO) {
         TaskHistory taskHistory = taskService.finalizeTasks(finalizeTaskRequestDTO);
+        return new ResponseEntity<>(taskHistory, HttpStatus.OK);
+    }
+
+    @GetMapping("/listTaskHistory")
+    public ResponseEntity<List<TaskHistory>> listTaskHistory(@RequestBody ListTaskHistoryRequestDTO listTaskHistoryRequestDTO) {
+        List<TaskHistory> taskHistory = taskService.listTaskHistories(listTaskHistoryRequestDTO);
         return new ResponseEntity<>(taskHistory, HttpStatus.OK);
     }
 }
