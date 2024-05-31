@@ -2,15 +2,19 @@ package com.example.backend.services;
 
 import com.example.backend.entities.Complement;
 import com.example.backend.entities.Task;
+import com.example.backend.entities.TaskHistory;
 import com.example.backend.entities.User;
 import com.example.backend.entities.request.CreateTaskRequestDTO;
+import com.example.backend.entities.request.FinalizeTaskRequestDTO;
 import com.example.backend.repositories.ComplementRepository;
+import com.example.backend.repositories.TaskHistoryRepository;
 import com.example.backend.repositories.TaskRepository;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -23,6 +27,9 @@ public class TaskService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TaskHistoryRepository taskHistoryRepository;
 
     public Task createTask(CreateTaskRequestDTO createTaskRequestDTO) {
         User user = userRepository.findByUsername(createTaskRequestDTO.getUsername());
@@ -56,5 +63,19 @@ public class TaskService {
             throw new RuntimeException("User not found");
         }
         return taskRepository.findByUserId(user.getId());
+    }
+
+    public TaskHistory finalizeTasks(FinalizeTaskRequestDTO finalizeTaskRequestDTO) {
+        Optional<Task> taskOptional = taskRepository.findById(finalizeTaskRequestDTO.getTaskId());
+        if (taskOptional.isEmpty()) {
+            throw new RuntimeException("Task not found");
+        }
+        Task task = taskOptional.get();
+        TaskHistory taskHistory = new TaskHistory();
+        taskHistory.setDate(finalizeTaskRequestDTO.getDate());
+        taskHistory.setValue(finalizeTaskRequestDTO.getValue());
+        taskHistory.setTaskId(task.getId());
+        TaskHistory persisted = taskHistoryRepository.save(taskHistory);
+        return persisted;
     }
 }
