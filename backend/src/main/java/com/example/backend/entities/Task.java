@@ -1,5 +1,8 @@
 package com.example.backend.entities;
+
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "Task")
 public class Task {
@@ -15,7 +18,9 @@ public class Task {
     @Column(name = "userId", nullable = false)
     private Long userId;
 
-    // Getters and Setters
+    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Complement complement;
+
     public Long getId() {
         return id;
     }
@@ -38,5 +43,13 @@ public class Task {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Complement getComplement() {
+        return complement;
+    }
+
+    public void setComplement(Complement complement) {
+        this.complement = complement;
     }
 }

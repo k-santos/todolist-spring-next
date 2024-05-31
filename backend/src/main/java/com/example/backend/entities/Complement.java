@@ -1,5 +1,7 @@
 package com.example.backend.entities;
+
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -17,10 +19,10 @@ public class Complement {
     @Column(nullable = false)
     private String unit;
 
-    @Column(name = "taskId", nullable = false)
-    private Long taskId;
+    @OneToOne
+    @JoinColumn(name = "task_id", referencedColumnName = "id")
+    private Task task;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -45,11 +47,11 @@ public class Complement {
         this.unit = unit;
     }
 
-    public Long getTaskId() {
-        return taskId;
+    public Task getTask() {
+        return task;
     }
 
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
+    public void setTask(Task task) {
+        this.task = task;
     }
 }
