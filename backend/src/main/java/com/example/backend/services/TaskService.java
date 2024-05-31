@@ -3,14 +3,14 @@ package com.example.backend.services;
 import com.example.backend.entities.Complement;
 import com.example.backend.entities.Task;
 import com.example.backend.entities.User;
-import com.example.backend.entities.request.TaskRequestDTO;
+import com.example.backend.entities.request.CreateTaskRequestDTO;
 import com.example.backend.repositories.ComplementRepository;
 import com.example.backend.repositories.TaskRepository;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class TaskService {
@@ -24,22 +24,22 @@ public class TaskService {
     @Autowired
     private UserRepository userRepository;
 
-    public Task createTask(TaskRequestDTO taskRequestDTO) {
-        User user = userRepository.findByUsername(taskRequestDTO.getUsername());
+    public Task createTask(CreateTaskRequestDTO createTaskRequestDTO) {
+        User user = userRepository.findByUsername(createTaskRequestDTO.getUsername());
         if (user == null) {
             throw new RuntimeException("User not found");
         }
 
         Task task = new Task();
-        task.setName(taskRequestDTO.getTaskName());
+        task.setName(createTaskRequestDTO.getTaskName());
         task.setUserId(user.getId());
 
         Task savedTask = taskRepository.save(task);
 
-        if (taskRequestDTO.getComplementUnit() != null && taskRequestDTO.getComplementValue() != null) {
+        if (createTaskRequestDTO.getComplementUnit() != null && createTaskRequestDTO.getComplementValue() != null) {
             Complement complement = new Complement();
-            complement.setUnit(taskRequestDTO.getComplementUnit());
-            complement.setValue(taskRequestDTO.getComplementValue());
+            complement.setUnit(createTaskRequestDTO.getComplementUnit());
+            complement.setValue(createTaskRequestDTO.getComplementValue());
             complement.setTask(savedTask);
             savedTask.setComplement(complement);
 
@@ -48,5 +48,13 @@ public class TaskService {
         }
 
         return taskRepository.save(savedTask);
+    }
+
+    public List<Task> listTasksByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return taskRepository.findByUserId(user.getId());
     }
 }

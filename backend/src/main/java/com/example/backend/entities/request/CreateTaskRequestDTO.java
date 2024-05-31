@@ -2,7 +2,7 @@ package com.example.backend.entities.request;
 
 import java.math.BigDecimal;
 
-public class TaskRequestDTO {
+public class CreateTaskRequestDTO {
     private String username;
     private String taskName;
     private String complementUnit;
