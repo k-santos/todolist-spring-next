@@ -47,7 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function signIn({ username, password }: SignInData) {
-    console.log("bateu aqui");
     const response = await api.post("api/login", {
       username,
       password,

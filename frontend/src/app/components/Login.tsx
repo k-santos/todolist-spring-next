@@ -25,6 +25,7 @@ const LoginForm: React.FC = () => {
   const onSubmitHandler = async (data: FieldsLogin) => {
     try {
       await signIn(data);
+      router.push("/dashboard");
     } catch (error) {
       setError("Error");
     }
