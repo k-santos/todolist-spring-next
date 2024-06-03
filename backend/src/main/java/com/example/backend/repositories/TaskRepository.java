@@ -17,7 +17,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 
     @Query("SELECT new com.example.backend.entities.DTOresponse.TaskResponseDTO(" +
-            "task.id, task.name, CONCAT(complement.value, ' ', complement.unit), taskHistory.id) " +
+            "task.id, task.name, CONCAT(ROUND(complement.value,1), ' ', complement.unit), taskHistory.id) " +
             "FROM Task task " +
             "LEFT JOIN TaskHistory taskHistory ON task.id = taskHistory.taskId " +
             "LEFT JOIN Complement complement ON task.id = complement.task.id " +
