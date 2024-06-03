@@ -1,15 +1,12 @@
 package com.example.backend.controllers;
 
-import com.example.backend.entities.request.JwtResponseDTO;
-import com.example.backend.entities.request.LoginRequestDTO;
+import com.example.backend.entities.DTOrequest.JwtResponseDTO;
+import com.example.backend.entities.DTOrequest.LoginRequestDTO;
 import com.example.backend.services.DetailServiceImpl;
 import com.example.backend.services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

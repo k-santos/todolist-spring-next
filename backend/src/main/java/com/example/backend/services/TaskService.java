@@ -1,12 +1,11 @@
 package com.example.backend.services;
 
 import com.example.backend.entities.Complement;
+import com.example.backend.entities.DTOrequest.*;
+import com.example.backend.entities.DTOresponse.TaskResponseDTO;
 import com.example.backend.entities.Task;
 import com.example.backend.entities.TaskHistory;
 import com.example.backend.entities.User;
-import com.example.backend.entities.request.CreateTaskRequestDTO;
-import com.example.backend.entities.request.FinalizeTaskRequestDTO;
-import com.example.backend.entities.request.ListTaskHistoryRequestDTO;
 import com.example.backend.repositories.ComplementRepository;
 import com.example.backend.repositories.TaskHistoryRepository;
 import com.example.backend.repositories.TaskRepository;
@@ -14,6 +13,7 @@ import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,22 +32,22 @@ public class TaskService {
     @Autowired
     private TaskHistoryRepository taskHistoryRepository;
 
-    public Task createTask(CreateTaskRequestDTO createTaskRequestDTO) {
-        User user = userRepository.findByUsername(createTaskRequestDTO.getUsername());
+    public Task createTask(CreateTaskRequestDTO createTaskRequestDTO, String username) {
+        User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
 
         Task task = new Task();
-        task.setName(createTaskRequestDTO.getTaskName());
+        task.setName(createTaskRequestDTO.getName());
         task.setUserId(user.getId());
 
         Task savedTask = taskRepository.save(task);
 
-        if (createTaskRequestDTO.getComplementUnit() != null && createTaskRequestDTO.getComplementValue() != null) {
+        if (createTaskRequestDTO.getUnit() != null && createTaskRequestDTO.getValue() != null) {
             Complement complement = new Complement();
-            complement.setUnit(createTaskRequestDTO.getComplementUnit());
-            complement.setValue(createTaskRequestDTO.getComplementValue());
+            complement.setUnit(createTaskRequestDTO.getUnit());
+            complement.setValue(createTaskRequestDTO.getValue());
             complement.setTask(savedTask);
             savedTask.setComplement(complement);
 
@@ -58,12 +58,20 @@ public class TaskService {
         return taskRepository.save(savedTask);
     }
 
-    public List<Task> listTasksByUsername(String username) {
-        User user = userRepository.findByUsername(username);
+    public List<Task> listTasksByUsername(ListTaskRequestDTO listTaskRequestDTO) {
+        User user = userRepository.findByUsername(listTaskRequestDTO.getUsername());
         if (user == null) {
             throw new RuntimeException("User not found");
         }
         return taskRepository.findByUserId(user.getId());
+    }
+
+    public List<TaskResponseDTO> findTaskAndHistory(String username, Timestamp timestamp) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return taskRepository.findTaskAndHistory(user.getId(), timestamp);
     }
 
     public TaskHistory finalizeTasks(FinalizeTaskRequestDTO finalizeTaskRequestDTO) {
@@ -80,8 +88,12 @@ public class TaskService {
         return persisted;
     }
 
-    public List<TaskHistory> listTaskHistories(ListTaskHistoryRequestDTO listTaskHistoryRequestDTO) {
-        Optional<Task> taskOptional = taskRepository.findById(listTaskHistoryRequestDTO.getTasId());
+    public void undoFinalizeTask(UndoFinalizeRequestDTO undoFinalizeRequestDTO) {
+        taskHistoryRepository.deleteById(undoFinalizeRequestDTO.getHistoryId());
+    }
+
+    public List<TaskHistory> listTaskHistories(Long taskId) {
+        Optional<Task> taskOptional = taskRepository.findById(taskId);
         if (taskOptional.isEmpty()) {
             throw new RuntimeException("Task not found");
         }

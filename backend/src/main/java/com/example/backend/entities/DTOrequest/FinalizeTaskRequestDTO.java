@@ -1,6 +1,4 @@
-package com.example.backend.entities.request;
-
-import jakarta.persistence.Column;
+package com.example.backend.entities.DTOrequest;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

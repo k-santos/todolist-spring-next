@@ -1,4 +1,4 @@
-package com.example.backend.entities.request;
+package com.example.backend.entities.DTOrequest;
 
 public class ListTaskHistoryRequestDTO {
     private Long taskId;
