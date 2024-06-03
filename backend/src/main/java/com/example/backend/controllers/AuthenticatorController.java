@@ -1,9 +1,11 @@
 package com.example.backend.controllers;
 
-import com.example.backend.entities.DTOrequest.JwtResponseDTO;
+import com.example.backend.entities.DTOrequest.LoginResponseDTO;
 import com.example.backend.entities.DTOrequest.LoginRequestDTO;
+import com.example.backend.entities.User;
 import com.example.backend.services.DetailServiceImpl;
 import com.example.backend.services.JwtService;
+import com.example.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,9 @@ public class AuthenticatorController {
     private JwtService jwtService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private DetailServiceImpl detailService;
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO login) throws Exception {
@@ -33,6 +38,7 @@ public class AuthenticatorController {
         }
         UserDetails userDetails = detailService.loadUserByUsername(login.getUsername());
         String token = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponseDTO(token));
+        User user = userService.findUserByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(new LoginResponseDTO(token, user.getName()));
     }
 }
