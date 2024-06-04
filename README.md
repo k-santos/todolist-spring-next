@@ -1,3 +1,19 @@
+<h1>Running the App</h1>
+<h3>Backend</h3>
+<p> You should assign the value of the database-related information in the application.properties and docker-compose.yaml files </p>
+<p> You also should execute the docker command bellow to create a database and then the application can be started</p>
+<pre><code>
+$ cd backend
+$ docker compose up -d
+</code></pre>
+
+<h3>Frontend</h3>
+<pre><code>
+$ cd frontend
+$ npm install
+$ npm run dev
+</code></pre>
+
 <h1>Technologies Used in the Frontend</h1>
 <ul>
   <li>Next</li>    
