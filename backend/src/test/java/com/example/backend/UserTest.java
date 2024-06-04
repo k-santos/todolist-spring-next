@@ -1,8 +1,10 @@
 package com.example.backend;
 
+import com.example.backend.entities.DTOrequest.CreateUserRequestDTO;
 import com.example.backend.entities.User;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.services.JwtService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,13 +37,13 @@ public class UserTest {
 	@Test
 	@DisplayName("Should create a user")
 	public void testCreateUser() throws Exception {
-		String userJson = """
-                {
-                    "name": "Test User",
-                    "username": "testuser",
-                    "password": "password"
-                }
-                """;
+		CreateUserRequestDTO userDTO = new CreateUserRequestDTO();
+		userDTO.setName("Name");
+		userDTO.setUsername("Username");
+		userDTO.setPassword("password");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String userJson = objectMapper.writeValueAsString(userDTO);
 
 		mockMvc.perform(post("/user/create")
 						.content(userJson)
@@ -50,22 +52,22 @@ public class UserTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
 
-		User user = userRepository.findByUsername("testuser");
+		User user = userRepository.findByUsername(userDTO.getUsername());
 		assertThat(user).isNotNull();
-		assertThat(user.getName()).isEqualTo("Test User");
-		assertThat(user.getUsername()).isEqualTo("testuser");
+		assertThat(user.getName()).isEqualTo(userDTO.getName());
+		assertThat(user.getUsername()).isEqualTo(userDTO.getUsername());
 	}
 
 	@Test
 	@DisplayName("Should not create a user without name")
 	public void testCreateUserWithoutName() throws Exception {
-		String userJson = """
-                {
-                    "name": null,
-                    "username": "testuser",
-                    "password": "password"
-                }
-                """;
+		CreateUserRequestDTO userDTO = new CreateUserRequestDTO();
+		userDTO.setName(null);
+		userDTO.setUsername("Username");
+		userDTO.setPassword("password");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String userJson = objectMapper.writeValueAsString(userDTO);
 
 		mockMvc.perform(post("/user/create")
 						.content(userJson)
@@ -77,13 +79,13 @@ public class UserTest {
 	@Test
 	@DisplayName("Should not create a user without username")
 	public void testCreateUserWithoutUsername() throws Exception {
-		String userJson = """
-                {
-                    "name": "Name",
-                    "username": null,
-                    "password": "password"
-                }
-                """;
+		CreateUserRequestDTO userDTO = new CreateUserRequestDTO();
+		userDTO.setName("Name");
+		userDTO.setUsername(null);
+		userDTO.setPassword("password");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String userJson = objectMapper.writeValueAsString(userDTO);
 
 		mockMvc.perform(post("/user/create")
 						.content(userJson)
@@ -95,13 +97,13 @@ public class UserTest {
 	@Test
 	@DisplayName("Should not create a user without password")
 	public void testCreateUserWithoutPassword() throws Exception {
-		String userJson = """
-                {
-                    "name": "Name",
-                    "username": "username",
-                    "password": null
-                }
-                """;
+		CreateUserRequestDTO userDTO = new CreateUserRequestDTO();
+		userDTO.setName("Name");
+		userDTO.setUsername("Username");
+		userDTO.setPassword(null);
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String userJson = objectMapper.writeValueAsString(userDTO);
 
 		mockMvc.perform(post("/user/create")
 						.content(userJson)
@@ -113,13 +115,14 @@ public class UserTest {
 	@Test
 	@DisplayName("Should not create a user when the password is less than 8 characteres")
 	public void testCreateUserWithShortPassword() throws Exception {
-		String userJson = """
-                {
-                    "name": "Name",
-                    "username": "username",
-                    "password": "1234567"
-                }
-                """;
+
+		CreateUserRequestDTO userDTO = new CreateUserRequestDTO();
+		userDTO.setName("Name");
+		userDTO.setUsername("Username");
+		userDTO.setPassword("1234567");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String userJson = objectMapper.writeValueAsString(userDTO);
 
 		mockMvc.perform(post("/user/create")
 						.content(userJson)
