@@ -1,8 +1,11 @@
 package com.example.backend.entities.DTOrequest;
 
+import jakarta.validation.constraints.NotEmpty;
+
 import java.math.BigDecimal;
 
 public class CreateTaskRequestDTO {
+    @NotEmpty
     private String name;
     private String unit;
     private BigDecimal value;

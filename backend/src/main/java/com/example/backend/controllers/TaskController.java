@@ -5,6 +5,7 @@ import com.example.backend.entities.DTOresponse.TaskResponseDTO;
 import com.example.backend.entities.Task;
 import com.example.backend.entities.TaskHistory;
 import com.example.backend.services.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping("/create")
-    public ResponseEntity<Task> createTask(
+    public ResponseEntity<Task> createTask(@Valid
             @RequestBody CreateTaskRequestDTO createTaskRequestDTO) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
