@@ -15,7 +15,7 @@ public class TaskHistory {
     @Column(name = "taskId", nullable = false)
     private Long taskId;
 
-    @Column(precision = 65, scale = 30)
+    @Column(precision = 10, scale = 1)
     private BigDecimal value;
 
     @Column(nullable = false)
