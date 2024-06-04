@@ -55,4 +55,76 @@ public class UserTest {
 		assertThat(user.getName()).isEqualTo("Test User");
 		assertThat(user.getUsername()).isEqualTo("testuser");
 	}
+
+	@Test
+	@DisplayName("Should not create a user without name")
+	public void testCreateUserWithoutName() throws Exception {
+		String userJson = """
+                {
+                    "name": null,
+                    "username": "testuser",
+                    "password": "password"
+                }
+                """;
+
+		mockMvc.perform(post("/user/create")
+						.content(userJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+	}
+
+	@Test
+	@DisplayName("Should not create a user without username")
+	public void testCreateUserWithoutUsername() throws Exception {
+		String userJson = """
+                {
+                    "name": "Name",
+                    "username": null,
+                    "password": "password"
+                }
+                """;
+
+		mockMvc.perform(post("/user/create")
+						.content(userJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+	}
+
+	@Test
+	@DisplayName("Should not create a user without password")
+	public void testCreateUserWithoutPassword() throws Exception {
+		String userJson = """
+                {
+                    "name": "Name",
+                    "username": "username",
+                    "password": null
+                }
+                """;
+
+		mockMvc.perform(post("/user/create")
+						.content(userJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+	}
+
+	@Test
+	@DisplayName("Should not create a user when the password is less than 8 characteres")
+	public void testCreateUserWithShortPassword() throws Exception {
+		String userJson = """
+                {
+                    "name": "Name",
+                    "username": "username",
+                    "password": "1234567"
+                }
+                """;
+
+		mockMvc.perform(post("/user/create")
+						.content(userJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+	}
 }
