@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.entities.DTOrequest.CreateUserRequestDTO;
 import com.example.backend.entities.User;
 import com.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,12 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User createUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public User createUser(CreateUserRequestDTO createUserRequestDTO) {
+        String encoded = passwordEncoder.encode(createUserRequestDTO.getPassword());
+        User user = new User();
+        user.setUsername(createUserRequestDTO.getUsername());
+        user.setName(createUserRequestDTO.getName());
+        user.setPassword(encoded);
         User savedUser = userRepository.save(user);
         return savedUser;
     }
