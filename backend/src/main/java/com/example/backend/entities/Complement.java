@@ -13,7 +13,7 @@ public class Complement {
     @SequenceGenerator(name = "complement_seq", sequenceName = "complement_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false, precision = 65, scale = 30)
+    @Column(nullable = false, precision = 10, scale = 1)
     private BigDecimal value;
 
     @Column(nullable = false)
