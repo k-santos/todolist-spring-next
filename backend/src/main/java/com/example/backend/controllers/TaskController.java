@@ -72,7 +72,7 @@ public class TaskController {
     }
 
     @PostMapping("/finish")
-    public ResponseEntity<TaskHistory> finalizeTasks(@RequestBody FinalizeTaskRequestDTO finalizeTaskRequestDTO) {
+    public ResponseEntity<TaskHistory> finalizeTasks(@Valid @RequestBody FinalizeTaskRequestDTO finalizeTaskRequestDTO) {
         TaskHistory taskHistory = taskService.finalizeTasks(finalizeTaskRequestDTO);
         return new ResponseEntity<>(taskHistory, HttpStatus.OK);
     }
