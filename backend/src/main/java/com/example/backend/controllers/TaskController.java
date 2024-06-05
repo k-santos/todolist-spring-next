@@ -78,7 +78,7 @@ public class TaskController {
     }
 
     @PostMapping("/undo")
-    public ResponseEntity<Void> undoFinalizeTask(@RequestBody UndoFinalizeRequestDTO undoFinalizeRequestDTO) {
+    public ResponseEntity<Void> undoFinalizeTask(@Valid @RequestBody UndoFinalizeRequestDTO undoFinalizeRequestDTO) {
         taskService.undoFinalizeTask(undoFinalizeRequestDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
