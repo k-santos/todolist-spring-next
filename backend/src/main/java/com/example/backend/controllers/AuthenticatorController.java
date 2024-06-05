@@ -1,6 +1,6 @@
 package com.example.backend.controllers;
 
-import com.example.backend.entities.DTOrequest.LoginResponseDTO;
+import com.example.backend.entities.DTOresponse.LoginResponseDTO;
 import com.example.backend.entities.DTOrequest.LoginRequestDTO;
 import com.example.backend.entities.User;
 import com.example.backend.services.DetailServiceImpl;
