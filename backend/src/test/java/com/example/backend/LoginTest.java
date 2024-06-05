@@ -72,4 +72,64 @@ public class LoginTest {
 		assertThat(token).isNotNull();
 	}
 
+	@Test
+	@DisplayName("should not login without username")
+	public void testLoginWithoutUsername() throws Exception {
+		CreateUserRequestDTO userDTO = new CreateUserRequestDTO();
+		userDTO.setName("Name");
+		userDTO.setUsername("Username");
+		userDTO.setPassword("password");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String userJson = objectMapper.writeValueAsString(userDTO);
+
+		mockMvc.perform(post("/user/create")
+						.content(userJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+		LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
+		loginRequestDTO.setUsername(null);
+		loginRequestDTO.setPassword(userDTO.getPassword());
+
+		String loginJson = objectMapper.writeValueAsString(loginRequestDTO);
+
+		mockMvc.perform(post("/api/login")
+						.content(loginJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
+	}
+
+	@Test
+	@DisplayName("should not login without password")
+	public void testLoginWithoutPassword() throws Exception {
+		CreateUserRequestDTO userDTO = new CreateUserRequestDTO();
+		userDTO.setName("Name");
+		userDTO.setUsername("Username");
+		userDTO.setPassword("password");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String userJson = objectMapper.writeValueAsString(userDTO);
+
+		mockMvc.perform(post("/user/create")
+						.content(userJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+		LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
+		loginRequestDTO.setUsername(userDTO.getUsername());
+		loginRequestDTO.setPassword(null);
+
+		String loginJson = objectMapper.writeValueAsString(loginRequestDTO);
+
+		mockMvc.perform(post("/api/login")
+						.content(loginJson)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
+	}
+
 }
