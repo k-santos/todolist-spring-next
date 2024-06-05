@@ -32,126 +32,122 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class CreateTaskTest {
 
-	@Autowired
-	private MockMvc mockMvc;
+    private static String token;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private ComplementRepository complementRepository;
 
-	@Autowired
-	private UserRepository userRepository;
+    @BeforeAll
+    public static void setUp(@Autowired MockMvc mockMvc,
+                             @Autowired UserRepository userRepository,
+                             @Autowired ObjectMapper objectMapper) throws Exception {
+        userRepository.deleteAll();
 
-	@Autowired
-	private TaskRepository taskRepository;
+        CreateUserRequestDTO createUserRequestDTO = new CreateUserRequestDTO();
+        createUserRequestDTO.setName("Test User");
+        createUserRequestDTO.setUsername("testuser");
+        createUserRequestDTO.setPassword("password");
 
-	@Autowired
-	private ComplementRepository complementRepository;
+        String userJson = objectMapper.writeValueAsString(createUserRequestDTO);
 
-	private static String token;
+        mockMvc.perform(post("/user/create")
+                        .content(userJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-	@BeforeAll
-	public static void setUp(@Autowired MockMvc mockMvc,
-							 @Autowired UserRepository userRepository,
-							 @Autowired ObjectMapper objectMapper) throws Exception {
-		userRepository.deleteAll();
+        LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
+        loginRequestDTO.setUsername("testuser");
+        loginRequestDTO.setPassword("password");
 
-		CreateUserRequestDTO createUserRequestDTO = new CreateUserRequestDTO();
-		createUserRequestDTO.setName("Test User");
-		createUserRequestDTO.setUsername("testuser");
-		createUserRequestDTO.setPassword("password");
+        String loginJson = objectMapper.writeValueAsString(loginRequestDTO);
 
-		String userJson = objectMapper.writeValueAsString(createUserRequestDTO);
+        MvcResult loginResult = mockMvc.perform(post("/api/login")
+                        .content(loginJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
 
-		mockMvc.perform(post("/user/create")
-						.content(userJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        String responseContent = loginResult.getResponse().getContentAsString();
+        token = parse(responseContent).read("$.token", String.class);
+    }
 
-		LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
-		loginRequestDTO.setUsername("testuser");
-		loginRequestDTO.setPassword("password");
+    @BeforeEach
+    public void cleanUp() {
+        complementRepository.deleteAll();
+        taskRepository.deleteAll();
+    }
 
-		String loginJson = objectMapper.writeValueAsString(loginRequestDTO);
+    @Test
+    @DisplayName("Should create a task")
+    public void testCreateTask() throws Exception {
+        CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
+        createTaskRequestDTO.setName("Go to the gym");
 
-		MvcResult loginResult = mockMvc.perform(post("/api/login")
-						.content(loginJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andReturn();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
 
-		String responseContent = loginResult.getResponse().getContentAsString();
-		token = parse(responseContent).read("$.token", String.class);
-	}
+        mockMvc.perform(post("/task/create")
+                        .header("Authorization", "Bearer " + token)
+                        .content(taskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-	@BeforeEach
-	public void cleanUp() {
-		complementRepository.deleteAll();
-		taskRepository.deleteAll();
-	}
+        List<Task> tasks = taskRepository.findAll();
+        assertThat(tasks).isNotNull();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.get(0).getName()).isEqualTo(createTaskRequestDTO.getName());
+    }
 
-	@Test
-	@DisplayName("Should create a task")
-	public void testCreateTask() throws Exception {
-		CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
-		createTaskRequestDTO.setName("Go to the gym");
+    @Test
+    @DisplayName("Should create a task with complement")
+    public void testCreateTaskWithComplement() throws Exception {
+        CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
+        createTaskRequestDTO.setName("Read a book");
+        createTaskRequestDTO.setUnit("pages");
+        createTaskRequestDTO.setValue(new BigDecimal("10.5"));
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
 
-		mockMvc.perform(post("/task/create")
-						.header("Authorization", "Bearer " + token)
-						.content(taskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(post("/task/create")
+                        .header("Authorization", "Bearer " + token)
+                        .content(taskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-		List<Task> tasks =  taskRepository.findAll();
-		assertThat(tasks).isNotNull();
-		assertThat(tasks).hasSize(1);
-		assertThat(tasks.get(0).getName()).isEqualTo(createTaskRequestDTO.getName());
-	}
+        List<Task> tasks = taskRepository.findAll();
+        assertThat(tasks).isNotNull();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.get(0).getName()).isEqualTo(createTaskRequestDTO.getName());
+        assertThat(tasks.get(0).getComplement().getUnit()).isEqualTo(createTaskRequestDTO.getUnit());
+        assertThat(tasks.get(0).getComplement().getValue()).isEqualTo(createTaskRequestDTO.getValue());
+    }
 
-	@Test
-	@DisplayName("Should create a task with complement")
-	public void testCreateTaskWithComplement() throws Exception {
-		CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
-		createTaskRequestDTO.setName("Read a book");
-		createTaskRequestDTO.setUnit("pages");
-		createTaskRequestDTO.setValue(new BigDecimal(10.5));
+    @Test
+    @DisplayName("Should not create a task without name")
+    public void testCreateTaskWithoutName() throws Exception {
+        CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
+        createTaskRequestDTO.setName(null);
+        createTaskRequestDTO.setUnit("pages");
+        createTaskRequestDTO.setValue(new BigDecimal("10.5"));
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
 
-		mockMvc.perform(post("/task/create")
-						.header("Authorization", "Bearer " + token)
-						.content(taskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
-
-		List<Task> tasks =  taskRepository.findAll();
-		assertThat(tasks).isNotNull();
-		assertThat(tasks).hasSize(1);
-		assertThat(tasks.get(0).getName()).isEqualTo(createTaskRequestDTO.getName());
-		assertThat(tasks.get(0).getComplement().getUnit()).isEqualTo(createTaskRequestDTO.getUnit());
-		assertThat(tasks.get(0).getComplement().getValue()).isEqualTo(createTaskRequestDTO.getValue());
-	}
-
-	@Test
-	@DisplayName("Should not create a task without name")
-	public void testCreateTaskWithoutName() throws Exception {
-		CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
-		createTaskRequestDTO.setName(null);
-		createTaskRequestDTO.setUnit("pages");
-		createTaskRequestDTO.setValue(new BigDecimal(10.5));
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
-
-		mockMvc.perform(post("/task/create")
-						.header("Authorization", "Bearer " + token)
-						.content(taskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
-	}
+        mockMvc.perform(post("/task/create")
+                        .header("Authorization", "Bearer " + token)
+                        .content(taskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 }

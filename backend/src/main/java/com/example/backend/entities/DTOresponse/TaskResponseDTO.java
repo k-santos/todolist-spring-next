@@ -1,7 +1,5 @@
 package com.example.backend.entities.DTOresponse;
 
-import java.math.BigDecimal;
-
 public class TaskResponseDTO {
     private Long id;
     private String name;

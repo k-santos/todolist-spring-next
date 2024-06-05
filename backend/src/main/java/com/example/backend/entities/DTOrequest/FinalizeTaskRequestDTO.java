@@ -1,6 +1,5 @@
 package com.example.backend.entities.DTOrequest;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
@@ -12,6 +11,7 @@ public class FinalizeTaskRequestDTO {
     private BigDecimal value;
     @NotNull
     private Timestamp date;
+
     public Long getTaskId() {
         return taskId;
     }

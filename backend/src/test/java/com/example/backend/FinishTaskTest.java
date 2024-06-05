@@ -36,191 +36,185 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class FinishTaskTest {
 
-	@Autowired
-	private MockMvc mockMvc;
+    private static String token;
+    private static Long idTask;
+    private static Long idTaskWithComplement;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private TaskHistoryRepository taskHistoryRepository;
+    @Autowired
+    private ComplementRepository complementRepository;
 
-	@Autowired
-	private UserRepository userRepository;
+    @BeforeAll
+    public static void setUp(@Autowired MockMvc mockMvc,
+                             @Autowired UserRepository userRepository,
+                             @Autowired TaskRepository taskRepository,
+                             @Autowired ObjectMapper objectMapper) throws Exception {
+        userRepository.deleteAll();
 
-	@Autowired
-	private TaskRepository taskRepository;
+        CreateUserRequestDTO createUserRequestDTO = new CreateUserRequestDTO();
+        createUserRequestDTO.setName("Test User");
+        createUserRequestDTO.setUsername("testuser");
+        createUserRequestDTO.setPassword("password");
 
-	@Autowired
-	private TaskHistoryRepository taskHistoryRepository;
+        String userJson = objectMapper.writeValueAsString(createUserRequestDTO);
 
-	@Autowired
-	private ComplementRepository complementRepository;
+        mockMvc.perform(post("/user/create")
+                        .content(userJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-	private static String token;
+        LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
+        loginRequestDTO.setUsername("testuser");
+        loginRequestDTO.setPassword("password");
 
-	private static Long idTask;
-	private static Long idTaskWithComplement;
+        String loginJson = objectMapper.writeValueAsString(loginRequestDTO);
 
-	@BeforeAll
-	public static void setUp(@Autowired MockMvc mockMvc,
-							 @Autowired UserRepository userRepository,
-							 @Autowired TaskRepository taskRepository,
-							 @Autowired ObjectMapper objectMapper) throws Exception {
-		userRepository.deleteAll();
+        MvcResult loginResult = mockMvc.perform(post("/api/login")
+                        .content(loginJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
 
-		CreateUserRequestDTO createUserRequestDTO = new CreateUserRequestDTO();
-		createUserRequestDTO.setName("Test User");
-		createUserRequestDTO.setUsername("testuser");
-		createUserRequestDTO.setPassword("password");
-
-		String userJson = objectMapper.writeValueAsString(createUserRequestDTO);
-
-		mockMvc.perform(post("/user/create")
-						.content(userJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
-
-		LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
-		loginRequestDTO.setUsername("testuser");
-		loginRequestDTO.setPassword("password");
-
-		String loginJson = objectMapper.writeValueAsString(loginRequestDTO);
-
-		MvcResult loginResult = mockMvc.perform(post("/api/login")
-						.content(loginJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andReturn();
-
-		String responseContent = loginResult.getResponse().getContentAsString();
-		token = parse(responseContent).read("$.token", String.class);
+        String responseContent = loginResult.getResponse().getContentAsString();
+        token = parse(responseContent).read("$.token", String.class);
 
 
-	}
+    }
 
-	@BeforeEach
-	public void createTasks() throws Exception {
-		complementRepository.deleteAll();
-		taskRepository.deleteAll();
-		taskHistoryRepository.deleteAll();
-		CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
-		createTaskRequestDTO.setName("Go to the gym");
-		ObjectMapper objectMapper = new ObjectMapper();
-		String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
+    @BeforeEach
+    public void createTasks() throws Exception {
+        complementRepository.deleteAll();
+        taskRepository.deleteAll();
+        taskHistoryRepository.deleteAll();
+        CreateTaskRequestDTO createTaskRequestDTO = new CreateTaskRequestDTO();
+        createTaskRequestDTO.setName("Go to the gym");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String taskJson = objectMapper.writeValueAsString(createTaskRequestDTO);
 
-		mockMvc.perform(post("/task/create")
-						.header("Authorization", "Bearer " + token)
-						.content(taskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(post("/task/create")
+                        .header("Authorization", "Bearer " + token)
+                        .content(taskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-		List<Task> tasks = taskRepository.findAll();
-		idTask =  tasks.get(0).getId();
+        List<Task> tasks = taskRepository.findAll();
+        idTask = tasks.get(0).getId();
 
-		CreateTaskRequestDTO createTaskWithComplementRequestDTO = new CreateTaskRequestDTO();
-		createTaskWithComplementRequestDTO.setName("Read a book");
-		createTaskWithComplementRequestDTO.setUnit("pages");
-		createTaskWithComplementRequestDTO.setValue(new BigDecimal(10));
-		taskJson = objectMapper.writeValueAsString(createTaskWithComplementRequestDTO);
+        CreateTaskRequestDTO createTaskWithComplementRequestDTO = new CreateTaskRequestDTO();
+        createTaskWithComplementRequestDTO.setName("Read a book");
+        createTaskWithComplementRequestDTO.setUnit("pages");
+        createTaskWithComplementRequestDTO.setValue(new BigDecimal(10));
+        taskJson = objectMapper.writeValueAsString(createTaskWithComplementRequestDTO);
 
-		mockMvc.perform(post("/task/create")
-						.header("Authorization", "Bearer " + token)
-						.content(taskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(post("/task/create")
+                        .header("Authorization", "Bearer " + token)
+                        .content(taskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-		tasks = taskRepository.findAll();
-		idTaskWithComplement =  tasks.get(0).getId();
-	}
+        tasks = taskRepository.findAll();
+        idTaskWithComplement = tasks.get(0).getId();
+    }
 
-	@Test
-	@DisplayName("Should finish a task")
-	public void finishTask() throws Exception {
+    @Test
+    @DisplayName("Should finish a task")
+    public void finishTask() throws Exception {
 
-		FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
-		finalizeTaskRequestDTO.setTaskId(idTask);
-		finalizeTaskRequestDTO.setDate(new Timestamp(System.currentTimeMillis()));
+        FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
+        finalizeTaskRequestDTO.setTaskId(idTask);
+        finalizeTaskRequestDTO.setDate(new Timestamp(System.currentTimeMillis()));
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
 
-		mockMvc.perform(post("/task/finish")
-						.header("Authorization", "Bearer " + token)
-						.content(finalizeTaskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(post("/task/finish")
+                        .header("Authorization", "Bearer " + token)
+                        .content(finalizeTaskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-		List<TaskHistory> taskHistories =  taskHistoryRepository.findAll();
-		assertThat(taskHistories).isNotNull();
-		assertThat(taskHistories).hasSize(1);
-		assertThat(taskHistories.get(0).getTaskId()).isEqualTo(finalizeTaskRequestDTO.getTaskId());
-		assertThat(taskHistories.get(0).getDate()).isEqualTo(finalizeTaskRequestDTO.getDate());
-	}
+        List<TaskHistory> taskHistories = taskHistoryRepository.findAll();
+        assertThat(taskHistories).isNotNull();
+        assertThat(taskHistories).hasSize(1);
+        assertThat(taskHistories.get(0).getTaskId()).isEqualTo(finalizeTaskRequestDTO.getTaskId());
+        assertThat(taskHistories.get(0).getDate()).isEqualTo(finalizeTaskRequestDTO.getDate());
+    }
 
-	@Test
-	@DisplayName("Should finish a task with complement")
-	public void finishTaskWithComplement() throws Exception {
+    @Test
+    @DisplayName("Should finish a task with complement")
+    public void finishTaskWithComplement() throws Exception {
 
-		FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
-		finalizeTaskRequestDTO.setTaskId(idTaskWithComplement);
-		finalizeTaskRequestDTO.setValue(new BigDecimal(10.5));
-		finalizeTaskRequestDTO.setDate(new Timestamp(System.currentTimeMillis()));
+        FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
+        finalizeTaskRequestDTO.setTaskId(idTaskWithComplement);
+        finalizeTaskRequestDTO.setValue(new BigDecimal("10.5"));
+        finalizeTaskRequestDTO.setDate(new Timestamp(System.currentTimeMillis()));
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
 
-		mockMvc.perform(post("/task/finish")
-						.header("Authorization", "Bearer " + token)
-						.content(finalizeTaskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(post("/task/finish")
+                        .header("Authorization", "Bearer " + token)
+                        .content(finalizeTaskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-		List<TaskHistory> taskHistories =  taskHistoryRepository.findAll();
-		assertThat(taskHistories).isNotNull();
-		assertThat(taskHistories).hasSize(1);
-		assertThat(taskHistories.get(0).getTaskId()).isEqualTo(finalizeTaskRequestDTO.getTaskId());
-		assertThat(taskHistories.get(0).getDate()).isEqualTo(finalizeTaskRequestDTO.getDate());
-		assertThat(taskHistories.get(0).getValue()).isEqualTo(finalizeTaskRequestDTO.getValue());
-	}
+        List<TaskHistory> taskHistories = taskHistoryRepository.findAll();
+        assertThat(taskHistories).isNotNull();
+        assertThat(taskHistories).hasSize(1);
+        assertThat(taskHistories.get(0).getTaskId()).isEqualTo(finalizeTaskRequestDTO.getTaskId());
+        assertThat(taskHistories.get(0).getDate()).isEqualTo(finalizeTaskRequestDTO.getDate());
+        assertThat(taskHistories.get(0).getValue()).isEqualTo(finalizeTaskRequestDTO.getValue());
+    }
 
-	@Test
-	@DisplayName("Should not finish a task without idTask")
-	public void finishTaskWithoutIdTask() throws Exception {
+    @Test
+    @DisplayName("Should not finish a task without idTask")
+    public void finishTaskWithoutIdTask() throws Exception {
 
-		FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
-		finalizeTaskRequestDTO.setTaskId(null);
-		finalizeTaskRequestDTO.setDate(new Timestamp(System.currentTimeMillis()));
+        FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
+        finalizeTaskRequestDTO.setTaskId(null);
+        finalizeTaskRequestDTO.setDate(new Timestamp(System.currentTimeMillis()));
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
 
-		mockMvc.perform(post("/task/finish")
-						.header("Authorization", "Bearer " + token)
-						.content(finalizeTaskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
-	}
+        mockMvc.perform(post("/task/finish")
+                        .header("Authorization", "Bearer " + token)
+                        .content(finalizeTaskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 
-	@Test
-	@DisplayName("Should not finish a task without date")
-	public void finishTaskWithoutDate() throws Exception {
+    @Test
+    @DisplayName("Should not finish a task without date")
+    public void finishTaskWithoutDate() throws Exception {
 
-		FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
-		finalizeTaskRequestDTO.setTaskId(idTask);
-		finalizeTaskRequestDTO.setDate(null);
+        FinalizeTaskRequestDTO finalizeTaskRequestDTO = new FinalizeTaskRequestDTO();
+        finalizeTaskRequestDTO.setTaskId(idTask);
+        finalizeTaskRequestDTO.setDate(null);
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String finalizeTaskJson = objectMapper.writeValueAsString(finalizeTaskRequestDTO);
 
-		mockMvc.perform(post("/task/finish")
-						.header("Authorization", "Bearer " + token)
-						.content(finalizeTaskJson)
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
-	}
+        mockMvc.perform(post("/task/finish")
+                        .header("Authorization", "Bearer " + token)
+                        .content(finalizeTaskJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 
 
 }

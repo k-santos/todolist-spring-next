@@ -1,7 +1,10 @@
 package com.example.backend.services;
 
 import com.example.backend.entities.Complement;
-import com.example.backend.entities.DTOrequest.*;
+import com.example.backend.entities.DTOrequest.CreateTaskRequestDTO;
+import com.example.backend.entities.DTOrequest.FinalizeTaskRequestDTO;
+import com.example.backend.entities.DTOrequest.ListTaskRequestDTO;
+import com.example.backend.entities.DTOrequest.UndoFinalizeRequestDTO;
 import com.example.backend.entities.DTOresponse.TaskResponseDTO;
 import com.example.backend.entities.Task;
 import com.example.backend.entities.TaskHistory;

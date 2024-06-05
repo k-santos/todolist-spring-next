@@ -1,7 +1,6 @@
 package com.example.backend.entities;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "Task")

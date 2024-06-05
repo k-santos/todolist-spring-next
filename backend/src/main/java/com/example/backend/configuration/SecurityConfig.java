@@ -33,15 +33,15 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/api/login").permitAll()
-                .requestMatchers("/user/create").permitAll()
-                .requestMatchers("/task/undo").authenticated()
-                .requestMatchers("/task/finish").authenticated()
-                .requestMatchers("/task/history/**").authenticated()
-                .requestMatchers("/task/create").authenticated()
-                .requestMatchers("/task/find").authenticated())
+                        .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/user/create").permitAll()
+                        .requestMatchers("/task/undo").authenticated()
+                        .requestMatchers("/task/finish").authenticated()
+                        .requestMatchers("/task/history/**").authenticated()
+                        .requestMatchers("/task/create").authenticated()
+                        .requestMatchers("/task/find").authenticated())
 
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);
 

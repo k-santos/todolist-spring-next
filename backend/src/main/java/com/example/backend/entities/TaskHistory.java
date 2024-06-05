@@ -1,8 +1,10 @@
 package com.example.backend.entities;
 
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import jakarta.persistence.*;
+
 @Entity
 @Table(name = "TaskHistory")
 public class TaskHistory {

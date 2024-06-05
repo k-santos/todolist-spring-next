@@ -1,16 +1,14 @@
 package com.example.backend.controllers;
 
-import com.example.backend.entities.DTOrequest.*;
+import com.example.backend.entities.DTOrequest.CreateTaskRequestDTO;
+import com.example.backend.entities.DTOrequest.FinalizeTaskRequestDTO;
+import com.example.backend.entities.DTOrequest.UndoFinalizeRequestDTO;
 import com.example.backend.entities.DTOresponse.TaskResponseDTO;
 import com.example.backend.entities.Task;
 import com.example.backend.entities.TaskHistory;
 import com.example.backend.services.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.ZoneOffset;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,6 +16,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -29,13 +31,12 @@ public class TaskController {
 
     @PostMapping("/create")
     public ResponseEntity<Task> createTask(@Valid
-            @RequestBody CreateTaskRequestDTO createTaskRequestDTO) {
+                                           @RequestBody CreateTaskRequestDTO createTaskRequestDTO) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
 
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             username = userDetails.getUsername();
         }
 
@@ -54,8 +55,7 @@ public class TaskController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
 
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             username = userDetails.getUsername();
         }
 
