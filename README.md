@@ -40,4 +40,6 @@ $ npm run dev
   <li>Spring</li>
   <li>JWT</li>
   <li>PostgreSQL</li>
+  <li>Docker</li>
+  <li>JUnit</li>  
 </ul>
