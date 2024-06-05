@@ -6,6 +6,7 @@ import com.example.backend.entities.User;
 import com.example.backend.services.DetailServiceImpl;
 import com.example.backend.services.JwtService;
 import com.example.backend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class AuthenticatorController {
     @Autowired
     private DetailServiceImpl detailService;
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO login) throws Exception {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO login) throws Exception {
         try {
             authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));

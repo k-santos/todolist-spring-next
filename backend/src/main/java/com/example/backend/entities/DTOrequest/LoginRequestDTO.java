@@ -1,7 +1,11 @@
 package com.example.backend.entities.DTOrequest;
 
+import jakarta.validation.constraints.NotEmpty;
+
 public class LoginRequestDTO {
+    @NotEmpty
     private String username;
+    @NotEmpty
     private String password;
 
     public String getUsername() {
